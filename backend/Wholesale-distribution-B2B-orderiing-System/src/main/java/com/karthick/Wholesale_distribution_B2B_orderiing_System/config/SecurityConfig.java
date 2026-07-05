@@ -2,6 +2,7 @@ package com.karthick.Wholesale_distribution_B2B_orderiing_System.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -13,8 +14,10 @@ public class SecurityConfig {
         http
                 .csrf(csrf->csrf.disable())
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/hello").permitAll()
-                        .anyRequest().authenticated()).httpBasic(Customizer.withDefaults());
+//                        .requestMatchers(HttpMethod.POST,"/products").permitAll()
+                        .anyRequest().permitAll())
+//                        .anyRequest().authenticated())
+                      .httpBasic(Customizer.withDefaults());
 
                         return http.build();
     }
