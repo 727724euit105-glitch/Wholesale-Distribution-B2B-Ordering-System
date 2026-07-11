@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductController {
 
-    @Autowired
+    @Autowired //injects objects from securityConfig using @Bean object .
     private ProductService productService;
     @PostMapping
     public String addProduct(@Valid @RequestBody ProductRequestDTO dto){
@@ -24,11 +24,12 @@ public class ProductController {
          return "Success";
     }
     @GetMapping
-    public Page<ProductResponseDTO> getAllProducts(@RequestParam int page, @RequestParam int size){
-        return productService.getAllProducts( page, size);
+    public Page<ProductResponseDTO> getAllProducts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,@RequestParam(defaultValue = "id") String sortBy,@RequestParam(defaultValue = "asc") String direction){
+        return productService.getAllProducts( page, size,sortBy,direction);
     }
     @GetMapping("/{id}")
     public ProductResponseDTO getProductById(@PathVariable Long id){
+
         return productService.getProductById(id);
     }
     @PutMapping("/{id}")
@@ -52,5 +53,29 @@ public class ProductController {
     @GetMapping("/search/{productName}")
     public List<ProductResponseDTO> searchProduct(@PathVariable String productName){
         return productService.searchProduct(productName);
+    }
+    @GetMapping("/price/{minPrice}/{maxPrice}")
+    public List<ProductResponseDTO> getProductsByPriceRange(@PathVariable Double minPrice,@PathVariable Double maxPrice){
+        return productService.getProductByPriceRange(minPrice,maxPrice);
+    }
+    @GetMapping("/filter") //category+brand
+    public List<ProductResponseDTO> getProductByCategoryAndBrand(@RequestParam String category,@RequestParam String brand){
+        return productService.getProductsByCategoryAndBrand(category, brand);
+    }
+    @GetMapping("/search") //productname+brand
+    public List<ProductResponseDTO> searchProducts(@RequestParam String keyword){
+        return productService.searchProducts(keyword);
+    }
+    @GetMapping("/filter-price") //category+price
+    public List<ProductResponseDTO> getProductsByCategoryAndPrice(@RequestParam String category,@RequestParam Double minPrice,@RequestParam Double maxPrice){
+        return productService.getProductsByCategoryAndPrice(category,minPrice,maxPrice);
+    }
+    @GetMapping("/category/{category}/price-asc")
+    public List<ProductResponseDTO> getProductsByCategoryOrderByPriceAsc(@PathVariable String category){
+        return productService.getProductsByCategoryPriceAsc(category);
+    }
+    @GetMapping("/category/{category}/price-desc")
+    public List<ProductResponseDTO> getProductsByCategoryOrderByPriceDesc(@PathVariable String category){
+        return productService.getProductsByCategoryPriceDesc(category);
     }
 }

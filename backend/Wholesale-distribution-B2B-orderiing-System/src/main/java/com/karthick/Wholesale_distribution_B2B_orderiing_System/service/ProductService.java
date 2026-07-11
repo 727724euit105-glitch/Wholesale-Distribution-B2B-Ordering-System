@@ -6,20 +6,16 @@ import com.karthick.Wholesale_distribution_B2B_orderiing_System.entity.Product;
 import com.karthick.Wholesale_distribution_B2B_orderiing_System.exception.ProductNotFoundException;
 import com.karthick.Wholesale_distribution_B2B_orderiing_System.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Page;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProductService {
-    @Autowired
+    @Autowired //injects objects from securityConfig using @Bean object .
     private ProductRepository productRepository;
 
     public void addProduct(ProductRequestDTO dto) {
@@ -28,9 +24,15 @@ public class ProductService {
 
         productRepository.save(product);
     }
-        public Page<ProductResponseDTO> getAllProducts(int page,int size) {
+        public Page<ProductResponseDTO> getAllProducts(int page,int size,String sortBy,String directon) {
         //getAllproducts
-            Pageable pageable= PageRequest.of(page, size);
+            Sort sort;
+            if(directon.equalsIgnoreCase("desc")){
+                sort=Sort.by(sortBy).descending();
+            }else {
+                sort=Sort.by(sortBy).ascending();
+            }
+            Pageable pageable= PageRequest.of(page, size, sort);
             Page<Product> productPage=productRepository.findAll(pageable);
             return productPage.map(this::convertToDTO);
         }
@@ -42,10 +44,27 @@ public class ProductService {
         }
         return responseList;
     }
-    public List<ProductResponseDTO> getProductByBrand(String brand){
-        List<Product> products=productRepository.findByBrand(brand);
+    public List<ProductResponseDTO> getProductByPriceRange(Double minPrice,Double maxPrice){
+        List<Product> products=productRepository.findByPriceBetween(minPrice,maxPrice);
         List<ProductResponseDTO> responseList=new ArrayList<>();
         for(Product product:products){
+            responseList.add(convertToDTO(product));
+        }
+        return responseList;
+    }
+    public List<ProductResponseDTO> getProductByBrand(String brand){
+        List<Product> products=productRepository.findByBrand(brand); //Ask thr repo to returns Products Lidt
+        List<ProductResponseDTO> responseList=new ArrayList<>();
+        for(Product product:products){
+            responseList.add(convertToDTO(product));
+        }
+        return responseList;
+    }
+    //category+brand
+    public List<ProductResponseDTO> getProductsByCategoryAndBrand(String category,String brand){
+        List<Product> products=productRepository.findByCategoryAndBrand(category,brand);
+        List<ProductResponseDTO> responseList=new ArrayList<>();
+        for (Product product:products){
             responseList.add(convertToDTO(product));
         }
         return responseList;
@@ -58,6 +77,45 @@ public class ProductService {
         }
         return responseList;
     }
+    //productname+brand
+    public List<ProductResponseDTO> searchProducts(String keyword){
+        List<Product> products=productRepository.findByProductNameContainingIgnoreCaseOrBrandContainingIgnoreCase(keyword,keyword);
+        List<ProductResponseDTO> responseList=new ArrayList<>();
+        for(Product product:products){
+            responseList.add(convertToDTO(product));
+        }
+        return responseList;
+    }
+    //category+price
+    public List<ProductResponseDTO> getProductsByCategoryAndPrice(String category,Double minPrice,Double maxPrice){
+        List<Product> products=productRepository.findByCategoryAndPriceBetween(category,minPrice,maxPrice);
+        List<ProductResponseDTO> responseList=new ArrayList<>();
+        for(Product product:products){
+            responseList.add(convertToDTO(product));
+        }
+        return responseList;
+    }
+    //sort by price in asc order
+    public List<ProductResponseDTO> getProductsByCategoryPriceAsc(String category){
+        List<Product> products=productRepository.findByCategoryOrderByPriceAsc(category);
+        System.out.println(products);
+        System.out.println(products.size());
+        List<ProductResponseDTO> responseList=new ArrayList<>();
+        for(Product product:products){
+            responseList.add(convertToDTO(product));
+        }
+        return responseList;
+    }
+    //sort by price in desc order
+    public List<ProductResponseDTO> getProductsByCategoryPriceDesc(String category){
+        List<Product> products=productRepository.findByCategoryOrderByPriceDesc(category);
+        List<ProductResponseDTO> responseList=new ArrayList<>();
+        for(Product product:products){
+            responseList.add(convertToDTO(product));
+        }
+        return responseList;
+    }
+
         public ProductResponseDTO getProductById(Long id){
         Optional<Product> optionalProduct= productRepository.findById(id);
         if(optionalProduct.isPresent()){
@@ -95,7 +153,7 @@ public class ProductService {
         }
         }
     private ProductResponseDTO convertToDTO(Product product) {
-        //dto-to-entity conversion
+        //entity-dto conversion
         ProductResponseDTO dto = new ProductResponseDTO();
         dto.setId(product.getId());
         dto.setProductName(product.getProductName());
