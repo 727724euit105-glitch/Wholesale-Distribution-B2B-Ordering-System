@@ -1,11 +1,22 @@
 package com.karthick.Wholesale_distribution_B2B_orderiing_System.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
 public class DealerRequestDTO {
+    @NotBlank
     private String dealerName;
+    @NotBlank
     private String shopName;
+    @Pattern(regexp = "^[0-9][10]$",
+    message = "Mobile number must contain exactly 10 digits")
     private String mobile;
+    @Email
     private String email;
+    @NotBlank
     private String gstNumber;
+    @NotBlank
     private String address;
 
     public String getDealerName() {

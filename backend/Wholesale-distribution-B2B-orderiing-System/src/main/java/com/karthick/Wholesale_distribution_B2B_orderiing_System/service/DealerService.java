@@ -3,8 +3,13 @@ package com.karthick.Wholesale_distribution_B2B_orderiing_System.service;
 import com.karthick.Wholesale_distribution_B2B_orderiing_System.dto.DealerRequestDTO;
 import com.karthick.Wholesale_distribution_B2B_orderiing_System.dto.DealerResponseDTO;
 import com.karthick.Wholesale_distribution_B2B_orderiing_System.entity.Dealer;
+import com.karthick.Wholesale_distribution_B2B_orderiing_System.exception.ResourceNotFoundException;
 import com.karthick.Wholesale_distribution_B2B_orderiing_System.repository.DealerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,8 +26,20 @@ public class DealerService {
         Dealer dealer=convertToEntity(dto);
         dealerRepository.save(dealer);
     }
-    public List<DealerResponseDTO> getAllDealers(){
-        List<Dealer> dealers=dealerRepository.findAll();
+    public Page<DealerResponseDTO> getAllDealers(int page,int size,String sortBy,String direction){
+
+        Sort sort;
+        if(direction.equalsIgnoreCase("desc")){
+            sort=Sort.by(sortBy).descending();
+        }else {
+            sort=Sort.by(sortBy).ascending();
+        }
+        Pageable pageable= PageRequest.of(page, size, sort);
+        Page<Dealer> dealerPage=dealerRepository.findAll(pageable);
+        return dealerPage.map(this::convertToDTO);
+    }
+    public List<DealerResponseDTO> getDealerByName(String keyword){
+        List<Dealer> dealers=dealerRepository.findByDealerNameContainingIgnoreCase(keyword);
         List<DealerResponseDTO> responseList=new ArrayList<>();
         for(Dealer dealer:dealers){
             responseList.add(convertToDTO(dealer));
@@ -51,7 +68,7 @@ public class DealerService {
             dealer.setAddress(dto.getAddress());
             dealerRepository.save(dealer);
         }else{
-            throw new RuntimeException("Product Not Found");
+            throw new ResourceNotFoundException("Product Not Found");
         }
     }
     public void deleteDealer(Long id){
@@ -59,10 +76,10 @@ public class DealerService {
         if(dealer.isPresent()){
             dealerRepository.deleteById(id);
         }else{
-            throw new RuntimeException("Dealer Not Found");
+            throw new ResourceNotFoundException("Dealer Not Found");
         }
-
     }
+
     private Dealer convertToEntity(DealerRequestDTO dto){
         Dealer dealer=new Dealer();
         dealer.setDealerName(dto.getDealerName());

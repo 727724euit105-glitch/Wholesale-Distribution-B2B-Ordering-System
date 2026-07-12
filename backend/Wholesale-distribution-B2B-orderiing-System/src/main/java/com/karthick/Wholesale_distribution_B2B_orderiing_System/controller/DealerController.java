@@ -5,6 +5,7 @@ import com.karthick.Wholesale_distribution_B2B_orderiing_System.dto.DealerRespon
 import com.karthick.Wholesale_distribution_B2B_orderiing_System.service.DealerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +22,8 @@ public class DealerController {
         return "Dealer Added Successfully.";
     }
     @GetMapping
-    public List<DealerResponseDTO> getAllDealers(){
-        return dealerService.getAllDealers();
+    public Page<DealerResponseDTO> getAllDealers(@RequestParam (defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,@RequestParam(defaultValue = "id") String sortBy,@RequestParam(defaultValue = "asc") String direction){
+        return dealerService.getAllDealers(page, size,sortBy,direction);
     }
     @GetMapping("/{id}")
     public DealerResponseDTO getDealerById(@PathVariable Long id){
@@ -37,5 +38,9 @@ public class DealerController {
     public String deleteDealer(@PathVariable Long id){
         dealerService.deleteDealer(id);
         return "Dealer Deleted Successfully";
+    }
+    @GetMapping("/search")
+    public List<DealerResponseDTO> getDealerByName(@RequestParam String keyword){
+        return dealerService.getDealerByName(keyword);
     }
 }
