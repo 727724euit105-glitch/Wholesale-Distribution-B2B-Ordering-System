@@ -9,7 +9,7 @@ public class DealerRequestDTO {
     private String dealerName;
     @NotBlank
     private String shopName;
-    @Pattern(regexp = "^[0-9][10]$",
+    @Pattern(regexp = "^[0-9]{10}$",
     message = "Mobile number must contain exactly 10 digits")
     private String mobile;
     @Email

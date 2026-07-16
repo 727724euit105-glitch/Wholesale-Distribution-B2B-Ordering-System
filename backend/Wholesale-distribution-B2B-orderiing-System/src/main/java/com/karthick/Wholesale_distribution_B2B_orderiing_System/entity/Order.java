@@ -15,7 +15,7 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "dealer_id")
-    private Dealer dealer;
+    private Dealer dealer; //in later we want to sort by using dealerName we can use a dealer object (ex:sortBy=dealer.dealerName) in postman
 
     public Long getId() {
         return id;
